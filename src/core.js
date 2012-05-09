@@ -14,6 +14,7 @@
         loc   = win.location,
         html  = doc.documentElement,
         klass = [],        
+        replaceKlass = [],
         conf  = {
             width  : [240, 320, 480, 640, 767, 768, 800, 980, 1024, 1280, 1440, 1680, 1920],
             height : [240, 320, 480, 600, 768, 800, 900, 1080],
@@ -32,6 +33,10 @@
     
     function pushClass(name) {
         klass[klass.length] = name;
+    }
+
+    function replaceKlass(regex, replaceWith) {
+        replaceKlass[replaceKlass.length] = [regex, replaceWith];
     }
 
     function removeClass(name) {
@@ -56,8 +61,22 @@
 
         // internal: apply all classes
         if (!key) {
-            html.className += ' ' + klass.join( ' ' );
+
+            // Load class name into a variable, and modify that to avoid leaving the html
+            // tag in a state of having no width/height directives.
+            var className = html.className;
+
+            for (var i = 0, l = replaceKlass.length; i < l; i++) {
+              className = className.replace(replaceKlass[i][0], replaceKlass[i][1]);
+            }
+
+            className += ' ' + klass.join( ' ' );
+
+            html.className = className;
+
             klass = [];
+            replaceKlass = [];
+
             return api;
         }
 
