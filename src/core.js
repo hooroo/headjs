@@ -253,7 +253,7 @@
     // viewport resolutions: w-eq320, w-lte480, w-lte1024 / h-eq600, h-lte768, h-lte1024
     function screenSize() {
         // remove earlier sizes
-        html.className = html.className.replace(/ (w|w-eq|w-gte|w-lte|h|h-eq|h-gte|h-lte)\d+/g, "");
+        replaceKlass(/ (w|w-eq|w-gte|w-lte|h|h-eq|h-gte|h-lte)\d+/g, "");
 
         // Viewport width
         var iw = win.innerWidth || html.clientWidth,
