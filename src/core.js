@@ -165,7 +165,7 @@
 
 
     // add supported, not supported classes
-    var supported = ['ie', 'chrome', 'ff', 'ios', 'android', 'safari', 'opera'];
+    var supported = ['ie', 'chrome', 'ff', 'ios-device', 'android-device', 'safari', 'opera'];
     each(supported, function(name) {
         if (name === browser) {
              pushClass(name);
