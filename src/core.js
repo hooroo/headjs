@@ -8,16 +8,16 @@
 */
 ; (function(win, undefined) {
     "use strict";
-    
+
     var doc   = win.document,
         nav   = win.navigator,
         loc   = win.location,
         html  = doc.documentElement,
-        klass = [],        
+        klass = [],
         replaceKlasses = [],
         conf  = {
-            width  : [240, 320, 480, 640, 767, 768, 800, 980, 1024, 1280, 1440, 1680, 1920],
-            height : [240, 320, 480, 600, 768, 800, 900, 1080],
+            width  : [240, 320, 480, 640, 767, 768, 800, 980, 1003, 1024, 1280, 1440], // 1003 is a special case added just for IE at 1024 with permanent scrollbar
+            height : [240, 320, 480, 600, 700, 768],
             section: "section-",
             page   : "page-",
             head   : "head"
@@ -30,7 +30,7 @@
             }
         }
     }
-    
+
     function pushClass(name) {
         klass[klass.length] = name;
     }
@@ -102,15 +102,15 @@
 
     api.feature("js", true, true);
 
-    
+
     // browser type & version
     var ua     = nav.userAgent.toLowerCase(),
         mobile = /mobile/.test(ua);
-    
-    // useful for enabling/disabling feature (we can consider a desktop navigator to have more cpu/gpu power)        
+
+    // useful for enabling/disabling feature (we can consider a desktop navigator to have more cpu/gpu power)
     api.feature("mobile" ,  mobile, true);
     api.feature("desktop", !mobile, true);
-    
+
     // http://www.zytrax.com/tech/web/browser_ids.htm
     // http://www.zytrax.com/tech/web/mobile_ids.html
     ua = /(chrome|firefox)[ \/]([\w.]+)/.exec(ua)                 || // Chrome & Firefox
@@ -124,7 +124,7 @@
         version = parseFloat(ua[2]),
 
     start = 0,
-    stop  = 0;    
+    stop  = 0;
     switch(browser) {
         case 'msie':
             browser = 'ie';
@@ -173,12 +173,12 @@
             stop  = 12;
             break;
     }
-    
+
 
     // name can be used further on for various tasks, like font-face detection in css3.js
     api.browser = {
         name   : browser,
-        version: version        
+        version: version
     };
     api.browser[browser] = true;
 
@@ -191,11 +191,11 @@
         }
         else {
             // useful for targeting all but one specific browser vendor
-            pushClass(name + '-false');            
+            pushClass(name + '-false');
         }
-    });    
+    });
 
-    
+
     for (var v = start; v <= stop; v++) {
         if (version >= v) {
             pushClass(browser + "-gte" + v);
@@ -208,7 +208,7 @@
         if (version === v) {
             pushClass(browser + "-eq" + v);
         }
-    }   
+    }
 
 
     // IE lt9 specific
@@ -244,11 +244,11 @@
 
 
     // basic screen info
-    api.screen = {        
+    api.screen = {
         height: win.screen.height,
         width : win.screen.width
     };
-    
+
 
     // viewport resolutions: w-eq320, w-lte480, w-lte1024 / h-eq600, h-lte768, h-lte1024
     function screenSize() {
@@ -278,7 +278,7 @@
                 pushClass("w-eq" + width);
             }
         });
-        
+
 
         // Viewport height
         var ih = win.innerHeight || html.clientHeight,
@@ -302,27 +302,27 @@
             if (ih === height)  {
                  pushClass("h-eq" + height);
              }
-        });        
+        });
 
         // no need for onChange event to detect this
         api.feature("portrait" , (ih > iw));
         api.feature("landscape", (ih < iw));
     }
-        
+
     screenSize();
-    
+
     // Throttle navigators from triggering too many resize events
-    var resizeId = 0;    
+    var resizeId = 0;
     function onResize() {
         clearTimeout(resizeId);
-        resizeId = setTimeout(screenSize, 100);        
+        resizeId = setTimeout(screenSize, 100);
     }
-    
+
     // Manualy attach, as to not overwrite existing handler
     if (win.addEventListener) {
         win.addEventListener("resize", onResize, false);
 
     } else {
         win.attachEvent("onresize", onResize);
-    }    
+    }
 })(window);
