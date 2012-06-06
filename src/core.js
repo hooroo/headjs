@@ -16,7 +16,7 @@
         klass = [],
         replaceKlasses = [],
         conf  = {
-            width  : [240, 320, 480, 640, 767, 768, 800, 980, 1003, 1024, 1280, 1440], // 1003 is a special case added just for IE at 1024 with permanent scrollbar
+            width  : [240, 320, 480, 640, 767, 768, 800, 980, 1003, 1023, 1024, 1280, 1440], // 1003 is a special case added just for IE at 1024 with permanent scrollbar
             height : [240, 320, 480, 600, 700, 768],
             section: "section-",
             page   : "page-",
