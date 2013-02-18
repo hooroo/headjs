@@ -8,13 +8,12 @@
 */
 ; (function(win, undefined) {
     "use strict";
-
+    
     var doc   = win.document,
         nav   = win.navigator,
         loc   = win.location,
         html  = doc.documentElement,
-        klass = [],
-        replaceKlasses = [],
+        klass = [],        
         conf  = {
             width  : [240, 320, 480, 640, 767, 768, 800, 980, 1003, 1023, 1024, 1280, 1440], // 1003 is a special case added just for IE at 1024 with permanent scrollbar
             height : [240, 320, 480, 600, 700, 768],
@@ -30,13 +29,9 @@
             }
         }
     }
-
+    
     function pushClass(name) {
         klass[klass.length] = name;
-    }
-
-    function replaceKlass(regex, replaceWith) {
-        replaceKlasses[replaceKlasses.length] = [regex, replaceWith];
     }
 
     function removeClass(name) {
@@ -61,22 +56,8 @@
 
         // internal: apply all classes
         if (!key) {
-
-            // Load class name into a variable, and modify that to avoid leaving the html
-            // tag in a state of having no width/height directives.
-            var className = html.className;
-
-            for (var i = 0, l = replaceKlasses.length; i < l; i++) {
-              className = className.replace(replaceKlasses[i][0], replaceKlasses[i][1]);
-            }
-
-            className += ' ' + klass.join( ' ' );
-
-            html.className = className;
-
+            html.className += ' ' + klass.join( ' ' );
             klass = [];
-            replaceKlasses = [];
-
             return api;
         }
 
@@ -95,22 +76,23 @@
             removeClass(cssKey + '-false');
             removeClass(cssKey + '-true');
             api.feature();
-        }
+    }
 
         return api;
     };
 
-    api.feature("js", true, true);
-
+    // no queue here, so we can remove any eventual pre-existing no-js class
+    api.feature("js", true);
 
     // browser type & version
     var ua     = nav.userAgent.toLowerCase(),
-        mobile = /mobile/.test(ua);
-
-    // useful for enabling/disabling feature (we can consider a desktop navigator to have more cpu/gpu power)
+        mobile = /mobile|midp/.test(ua);
+    
+    // useful for enabling/disabling feature (we can consider a desktop navigator to have more cpu/gpu power)        
     api.feature("mobile" ,  mobile, true);
     api.feature("desktop", !mobile, true);
-
+    api.feature("touch"  , 'ontouchstart' in win, true);
+    
     // http://www.zytrax.com/tech/web/browser_ids.htm
     // http://www.zytrax.com/tech/web/mobile_ids.html
     ua = /(chrome|firefox)[ \/]([\w.]+)/.exec(ua)                 || // Chrome & Firefox
@@ -122,9 +104,9 @@
 
     var browser = ua[1],
         version = parseFloat(ua[2]),
-
-    start = 0,
-    stop  = 0;
+        start   = 0,
+        stop    = 0;    
+    
     switch(browser) {
         case 'msie':
             browser = 'ie';
@@ -136,15 +118,15 @@
 
         // Add/remove extra tests here
         case 'chrome':
-            start = 13;
-            stop  = 18;
+            start = 8;
+            stop  = 22;
             break;
 
         case 'firefox':
             browser = 'ff';
 
             start = 3;
-            stop  = 11;
+            stop  = 17;
             break;
 
         case 'ipod':
@@ -153,7 +135,7 @@
             browser = 'ios';
 
             start = 3;
-            stop  = 5;
+            stop  = 6;
             break;
 
         case 'android':
@@ -173,42 +155,46 @@
             stop  = 12;
             break;
     }
-
+    
 
     // name can be used further on for various tasks, like font-face detection in css3.js
     api.browser = {
         name   : browser,
-        version: version
+        version: version        
     };
     api.browser[browser] = true;
 
 
     // add supported, not supported classes
-    var supported = ['ie', 'chrome', 'ff', 'ios-device', 'android-device', 'safari', 'opera'];
+    var supported = ['ie', 'chrome', 'ff', 'ios', 'android', 'safari', 'opera'];
     each(supported, function(name) {
         if (name === browser) {
              pushClass(name);
+            pushClass(name + '-true');
         }
         else {
-            // useful for targeting all but one specific browser vendor
-            pushClass(name + '-false');
+            pushClass(name + '-false');            
         }
-    });
+    });    
 
-
+    
     for (var v = start; v <= stop; v++) {
-        if (version >= v) {
+        if (version > v) {
+            pushClass(browser + "-gt"  + v);
             pushClass(browser + "-gte" + v);
         }
 
-        if (version <= v) {
+        else if (version < v) {
+            pushClass(browser + "-lt"  + v);
             pushClass(browser + "-lte" + v);
         }
 
-        if (version === v) {
-            pushClass(browser + "-eq" + v);
+        else if (version === v) {
+            pushClass(browser + "-lte" + v);
+            pushClass(browser + "-eq"  + v);
+            pushClass(browser + "-gte" + v);
         }
-    }
+    }   
 
 
     // IE lt9 specific
@@ -244,16 +230,16 @@
 
 
     // basic screen info
-    api.screen = {
+    api.screen = {        
         height: win.screen.height,
         width : win.screen.width
     };
-
+    
 
     // viewport resolutions: w-eq320, w-lte480, w-lte1024 / h-eq600, h-lte768, h-lte1024
     function screenSize() {
         // remove earlier sizes
-        replaceKlass(/ (w|w-eq|w-gte|w-lte|h|h-eq|h-gte|h-lte)\d+/g, "");
+        html.className = html.className.replace(/ (w|w-eq|w-gt|w-gte|w-lt|w-lte|h|h-eq|h-gt|h-gte|h-lt|h-lte|portrait|no-portrait|landscape|no-landscape)\d+/g, "");
 
         // Viewport width
         var iw = win.innerWidth || html.clientWidth,
@@ -266,19 +252,23 @@
         pushClass("w" + iw);
 
         each(conf.width, function(width) {
-            if (iw >= width) {
+            if (iw > width) {
+                pushClass("w-gt"  + width);
                 pushClass("w-gte" + width);
             }
 
-            if (iw <= width) {
+            else if (iw < width) {
+                pushClass("w-lt"  + width);
                 pushClass("w-lte" + width);
             }
 
-            if (iw === width) {
-                pushClass("w-eq" + width);
+            else if (iw === width) {
+                pushClass("w-lte" + width);
+                pushClass("w-eq"  + width);
+                pushClass("w-gte" + width);
             }
         });
-
+        
 
         // Viewport height
         var ih = win.innerHeight || html.clientHeight,
@@ -291,38 +281,42 @@
         pushClass("h" + ih);
 
         each(conf.height, function(height) {
-             if (ih >= height) {
-                 pushClass("h-gte"  + height);
+             if (ih > height) {
+                 pushClass("h-gt"  + height);
+                 pushClass("h-gte" + height);
              }
 
-            if (ih <= height) {
+            else if (ih < height) {
+                pushClass("h-lt"  + height);
+                pushClass("h-lte" + height);
+             }
+
+            else if (ih === height) {
                  pushClass("h-lte" + height);
+                 pushClass("h-eq"  + height);
+                 pushClass("h-gte" + height);
              }
-
-            if (ih === height)  {
-                 pushClass("h-eq" + height);
-             }
-        });
+        });        
 
         // no need for onChange event to detect this
         api.feature("portrait" , (ih > iw));
         api.feature("landscape", (ih < iw));
     }
-
+        
     screenSize();
-
+    
     // Throttle navigators from triggering too many resize events
-    var resizeId = 0;
+    var resizeId = 0;    
     function onResize() {
-        clearTimeout(resizeId);
-        resizeId = setTimeout(screenSize, 100);
+        win.clearTimeout(resizeId);
+        resizeId = win.setTimeout(screenSize, 100);        
     }
-
-    // Manualy attach, as to not overwrite existing handler
+    
+    // Manually attach, as to not overwrite existing handler
     if (win.addEventListener) {
         win.addEventListener("resize", onResize, false);
 
     } else {
         win.attachEvent("onresize", onResize);
-    }
+    }    
 })(window);
