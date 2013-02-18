@@ -1,38 +1,36 @@
-/**
-    Head JS     The only script in your <HEAD>
-    Copyright   Tero Piirainen (tipiirai)
-    License     MIT / http://bit.ly/mit-license
-    Version     Modified: v0.96
-
-    https://github.com/itechnology/headjs
-*/
+/*!
+ * HeadJS     The only script in your <HEAD>    
+ * Author     Tero Piirainen  (tipiirai)
+ * Maintainer Robert Hoffmann (itechnology)
+ * License    MIT / http://bit.ly/mit-license
+ *
+ * Version 0.99
+ * http://headjs.com
+ */
 ;(function(win, undefined) {
     "use strict";
 
     var doc = win.document,
         nav = win.navigator,
 
-    /*
-        To add a new test:
+        /*
+            To add a new test:
 
-        head.feature("video", function() {
-            var tag = document.createElement('video');
-            return !!tag.canPlayType;
-        });
+            head.feature("video", function() {
+                var tag = document.createElement('video');
+                return !!tag.canPlayType;
+            });
 
-        Good place to grab more tests
+            Good place to grab more tests
 
-        https://github.com/Modernizr/Modernizr/blob/master/modernizr.js
-    */
-
-    /* CSS modernizer */
+        /* CSS modernizer */
          el       = doc.createElement("i"),
          style    = el.style,
          prefs    = ' -o- -moz- -ms- -webkit- -khtml- '.split(' '),
          domPrefs = 'Webkit Moz O ms Khtml'.split(' '),
 
-         head_var = win.head_conf && win.head_conf.head || "head",
-         api      = win[head_var];
+         headVar = win.head_conf && win.head_conf.head || "head",
+         api     = win[headVar];
 
     win.test = style;
      // Thanks Paul Irish!
@@ -42,6 +40,8 @@
                 return true;
             }
         }
+
+        return false;
     }
 
 
@@ -53,7 +53,6 @@
     }
 
     var tests = {
-
         gradient: function() {
             var s1 = 'background-image:',
                 s2 = 'gradient(linear,left top,right bottom,from(#9f9),to(#fff));',
@@ -104,16 +103,21 @@
         transition: function() {
             return testAll("transition");
         },
+        touch: function () {
+            return 'ontouchstart' in win;
+        },
+        retina: function () {
+            return (win.devicePixelRatio > 1);
+        },        
 
-        /* Euhmm ..
-         * i guess version numbers all depend on what kind of font detection you actually want: svg, woff, ttf/otf, or eot
-         * http://caniuse.com/#search=font
-         * The following values are set up for WOFF
-         ***********************/
-        fontFace: function() {
+        /*
+            font-face support. Uses browser sniffing but is synchronous.
+            http://paulirish.com/2009/font-face-feature-detection/
+        */
+        fontface: function() {
             var browser = api.browser.name, version = api.browser.version;
 
-            switch(browser) {
+            switch (browser) {
                 case "ie":
                     return version >= 9;
 
@@ -129,7 +133,7 @@
                 case "android":
                     return false;
 
-                case "safari":
+                case "webkit":
                     return version >= 5.1;
 
                 case "opera":
@@ -138,8 +142,6 @@
                 default:
                     return false;
             }
-
-            return false;
         }
     };
 
