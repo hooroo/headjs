@@ -22,7 +22,7 @@
         conf  = {
             screens   : [240, 320, 480, 640, 767, 768, 800, 980, 1003, 1023, 1024, 1280, 1440], // 1003 is a special case added just for IE at 1024 with permanent scrollbar
             height    : [240, 320, 480, 600, 700, 768],
-            screensCss: { "gt": true, "gte": false, "lt": true, "lte": false, "eq": false },
+            screensCss: { "gt": true, "gte": true, "lt": true, "lte": true, "eq": true },
             browsers  : [
                           { ie     : { min: 6, max: 10 } }
                        //,{ chrome : { min: 8, max: 24 } }
@@ -67,6 +67,7 @@
         api.ready.apply(null, arguments);
     };
 
+    api.features = {};
     api.feature = function (key, enabled, queue) {
 
         // internal: apply all classes
